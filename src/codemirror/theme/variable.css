@@ -1,0 +1,112 @@
+/*
+Solarized theme for code-mirror
+http://ethanschoonover.com/solarized
+*/
+
+/*
+Solarized color palette
+http://ethanschoonover.com/solarized/img/solarized-palette.png
+*/
+
+/* Color scheme for code-mirror */
+
+@import url('https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i,900,900i&subset=cyrillic,cyrillic-ext,latin-ext,vietnamese');
+
+.cm-s-variable {
+  
+  --cm-variable-final-font-family:          var(--cm-font-family, 'Merriweather', serif);
+  --cm-variable-final-color-base03:         var(--cm-color-base03, #002b36);
+  --cm-variable-final-color-base02:         var(--cm-color-base02, #073642);
+  --cm-variable-final-color-base01:         var(--cm-color-base01, #586e75);
+  --cm-variable-final-color-base00:         var(--cm-color-base00, #657b83);
+  --cm-variable-final-color-base0:          var(--cm-color-base0, #839496);
+  --cm-variable-final-color-base1:          var(--cm-color-base1, #93a1a1);
+  --cm-variable-final-color-base2:          var(--cm-color-base2, #eee8d5);
+  --cm-variable-final-color-base3:          var(--cm-color-base3, #fdf6e3);
+  --cm-variable-final-color-solar-yellow:   var(--cm-color-solar-yellow, #b58900);
+  --cm-variable-final-color-solar-orange:   var(--cm-color-solar-orange, #cb4b16);
+  --cm-variable-final-color-solar-red:      var(--cm-color-solar-red, #dc322f);
+  --cm-variable-final-color-solar-magenta:  var(--cm-color-solar-magenta, #d33682);
+  --cm-variable-final-color-solar-violet:   var(--cm-color-solar-violet, #6c71c4);
+  --cm-variable-final-color-solar-blue:     var(--cm-color-solar-blue, #268bd2);
+  --cm-variable-final-color-solar-cyan:     var(--cm-color-solar-cyan, #2aa198);
+  --cm-variable-final-color-solar-green:    var(--cm-color-solar-green, #859900);
+
+
+  line-height: 2rem;
+  color-profile: sRGB;
+  rendering-intent: auto;
+  font-family: var(--cm-variable-final-font-family);
+
+}
+
+.cm-s-variable .CodeMirror-widget {
+  text-shadow: none;
+}
+
+.cm-s-variable .cm-header { color: var(--cm-variable-final-color-base01); }
+.cm-s-variable .cm-quote { color: var(--cm-variable-final-color-base1); }
+
+.cm-s-variable .cm-keyword { color: var(--cm-variable-final-color-solar-orange); }
+.cm-s-variable .cm-atom { color: var(--cm-variable-final-color-solar-magenta); }
+.cm-s-variable .cm-number { color: var(--cm-variable-final-color-solar-magenta); }
+.cm-s-variable .cm-def { color: var(--cm-variable-final-color-solar-cyan); }
+
+.cm-s-variable .cm-variable { color: var(--cm-variable-final-color-base0); }
+.cm-s-variable .cm-variable-2 { color: var(--cm-variable-final-color-solar-yellow); }
+.cm-s-variable .cm-variable-3, .cm-s-variable .cm-type { color: var(--cm-variable-final-color-solar-violet); }
+
+.cm-s-variable .cm-property { color: var(--cm-variable-final-color-solar-cyan); }
+.cm-s-variable .cm-operator { color: var(--cm-variable-final-color-solar-violet); }
+
+.cm-s-variable .cm-comment { color: var(--cm-variable-final-color-base01); font-style:italic; }
+
+.cm-s-variable .cm-string { color: var(--cm-variable-final-color-solar-green); }
+.cm-s-variable .cm-string-2 { color: var(--cm-variable-final-color-solar-yellow); }
+
+.cm-s-variable .cm-meta { color: var(--cm-variable-final-color-solar-green); }
+.cm-s-variable .cm-qualifier { color: var(--cm-variable-final-color-solar-yellow); }
+.cm-s-variable .cm-builtin { color: var(--cm-variable-final-color-solar-magenta); }
+.cm-s-variable .cm-bracket { color: var(--cm-variable-final-color-solar-orange); }
+.cm-s-variable .CodeMirror-matchingbracket { color: var(--cm-variable-final-color-solar-green); }
+.cm-s-variable .CodeMirror-nonmatchingbracket { color: var(--cm-variable-final-color-solar-red); }
+.cm-s-variable .cm-tag { color: var(--cm-variable-final-color-base1); }
+.cm-s-variable .cm-attribute { color: var(--cm-variable-final-color-solar-cyan); }
+.cm-s-variable .cm-hr {
+  color: transparent;
+  border-top: 1px solid var(--cm-variable-final-color-base01);
+  display: block;
+}
+.cm-s-variable .cm-link { color: var(--cm-variable-final-color-base1); cursor: pointer; }
+.cm-s-variable .cm-special { color: var(--cm-variable-final-color-solar-violet); }
+.cm-s-variable .cm-em {
+  color: var(--cm-variable-final-color-base1);
+}
+.cm-s-variable .cm-error,
+.cm-s-variable .cm-invalidchar {
+  color: var(--cm-variable-final-color-base01);
+  border-bottom: 1px dotted var(--cm-variable-final-color-solar-red);
+}
+
+/* Editor styling */
+
+
+
+/* Remove gutter border */
+.cm-s-variable .CodeMirror-gutters {
+  border-right: 0;
+}
+
+/* Common */
+.cm-s-variable .CodeMirror-linenumber {
+  padding: 0 5px;
+}
+.cm-s-variable .CodeMirror-guttermarker-subtle { color: var(--cm-variable-final-color-base01); }
+
+.cm-s-variable .CodeMirror-gutter .CodeMirror-gutter-text {
+  color: var(--cm-variable-final-color-base01);
+}
+
+/* Cursor */
+.cm-s-variable .CodeMirror-cursor { border-left: 1px solid #819090; }
+
