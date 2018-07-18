@@ -2,57 +2,57 @@ import * as CodeMirror from 'react-codemirror'
 import * as React from 'react'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/gfm/gfm'
-import styles from './Editor.module.css'
+import sheet from './editorStyles'
+
+import Paper from '@material-ui/core/Paper'
 
 import '../codemirror/theme/variable.css'
 import 'codemirror/theme/solarized.css'
-
-const test = `
-
-# Heading 1
-## Heading 2
-### Heading 3
-#### Heading 4
-##### Heading 5
-###### Heading 6
+import { createMuiTheme } from '@material-ui/core/styles';
+import cyan from '@material-ui/core/colors/cyan';
+import blue from '@material-ui/core/colors/blue';
+import {text} from './sample'
+import createTheme from '../codemirror/theme/material-ui'
+import injectSheet from 'react-jss'
 
 
-*italic*
-**bold**
-[link](http://example.com)
+const mui = createMuiTheme({
+  typography: {
+    // Use the system font instead of the default Roboto font.
+    fontFamily: [
+      '"Merriweather"', 'serif'
+    ].join(', '),
+  },
+  palette: {
+    type: 'light',
+    primary: cyan,
+    secondary: blue,
+  },
+  status: {
+    danger: 'orange',
+  },
+})
+const theme = createTheme(mui)
+console.log('foo is', theme.classes.foo)
 
-~~Mistaken text.~~
-
-> quote from some guy somewhere
-
-- list of things
-- this is another thing
-- this is a final thing
-
-1. numbered list
-2. so number
-3. such wow
-
-------------------------
-
-Cough hairball, eat toilet paper attempt to leap between furniture but woefully miscalibrate and bellyflop onto the floor; what's your problem? i meant to do that now i shall wash myself intently for i'm bored inside, let me out i'm lonely outside, let me in i can't make up my mind whether to go in or out, guess i'll just stand partway in and partway out, contemplating the universe for half an hour how dare you nudge me with your foot?!?! leap into the air in greatest offense! for if it smells like fish eat as much as you wish and sleep nap, yet sniff catnip and act crazy. With tail in the air mrow or loves cheeseburgers yet pet right here, no not there, here, no fool, right here that other cat smells funny you should really give me all the treats because i smell the best and omg you finally got the right spot and i love you right now or scratch at the door then walk away mewl for food at 4am knock dish off table head butt cant eat out of my own dish. 
 
 
-`
 
-export class Editor extends React.Component{
+export const Editor = injectSheet(sheet)(class UnstyledEditor extends React.Component{
 
   constructor(props) {
     super(props)
+    console.log({props: this.props})
+    const value = window.localStorage.getItem('content') || text
     this.state = {
-      value: test,
+      value: value,
       options: {
         lineWrapping: true,
         mode: {
           name: 'gfm',
           highlightFormatting: true,
         },
-        theme: 'variable'
+        theme: 'material-ui'
       }
     }
 
@@ -61,12 +61,17 @@ export class Editor extends React.Component{
 
 
   render() {
-    return <div>
+    const classes = this.props.classes
+    return <div className={classes.editorContainer}>
+
+
       <CodeMirror
-        className={styles.Editor}
+        className={`${classes.editor} ${theme.classes.materialUI}`}
         options={this.state.options}
         value={this.state.value}
         onChange={this.onValueChanged} />
+
+
     </div>
   }
 
@@ -75,7 +80,8 @@ export class Editor extends React.Component{
   }
 
   onValueChanged = (value) => {
+    window.localStorage.setItem('content', value)
     this.setState({ value })
   }
 
-}
+})

@@ -1,0 +1,93 @@
+FTUE
+
+Name?
+Create Project "everything saved"
+Edit
+Save versions
+Add backup Git?
+Export
+  - html
+    - neoocities
+  - email (needs server)
+  - download
+Style
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Project {
+  
+  roots: GraphNode[]
+
+}
+
+
+GraphNode {
+  edges: ref GraphNode[]
+  document: Document
+}
+
+Document {
+  author: Author
+  created: Timestamp
+  title: Markdown
+  content: Markdown
+  edits: Diff[]
+}
+
+Diff {
+  author: Author
+  description: DiffDescription
+}
+
+
+
+
+
+
+Git
+|
+|
+|
+|
+|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

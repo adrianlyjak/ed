@@ -1,91 +1,120 @@
-/*
-Solarized theme for code-mirror
-http://ethanschoonover.com/solarized
-*/
 
-/*
-Solarized color palette
-http://ethanschoonover.com/solarized/img/solarized-palette.png
-*/
-
-/* Color scheme for code-mirror */
 
 @import url('https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i,900,900i&subset=cyrillic,cyrillic-ext,latin-ext,vietnamese');
 
 .cm-s-variable {
+
+
+  --color-base03:               var(--cm-base03, #002b36);
+  --color-base02:               var(--cm-base02, #073642);
+  --color-base01:               var(--cm-base01, #586e75);
+  --color-base00:               var(--cm-base00, #657b83);
+  --color-base0:                var(--cm-base0, #839496);
+  --color-base1:                var(--cm-base1, #93a1a1);
+  --color-base2:                var(--cm-base2, #eee8d5);
+  --color-base3:                var(--cm-base3, #fdf6e3);
+  --color-solar-yellow:         var(--cm-solar-yellow, #b58900);
+  --color-solar-orange:         var(--cm-solar-orange, #cb4b16);
+  --color-solar-red:            var(--cm-solar-red, #dc322f);
+  --color-solar-magenta:        var(--cm-solar-magenta, #d33682);
+  --color-solar-violet:         var(--cm-solar-violet, #6c71c4);
+  --color-solar-blue:           var(--cm-solar-blue, #268bd2);
+  --color-solar-cyan:           var(--cm-solar-cyan, #2aa198);
+  --color-solar-green:          var(--cm-solar-green, #859900);
+
+  --font-family:                var(--cm-font-family, 'Merriweather', serif);
+  --color-body:                 var(--cm-color-body, #555);
+  --weight-body:                var(--cm-weight-body, 500);
+
+  --color-header:               var(--cm-color-header, var(--color-base01));
+  --color-header-highlight:     var(--cm-color-header-highlight, var(--color-base00));
+  --color-quote:                var(--cm-color-quote, var(--color-base1));
+  --color-quote-highlight:      var(--cm-color-quote-highlight, var(--color-base2));
+  --color-link:                 var(--cm-color-link, var(--color-base1));
+  --color-link-highlight:       var(--cm-color-link-highlight, var(--color-base2));
+  --color-em:                   var(--cm-color-em, var(--color-base1));
+  --color-em-highlight:         var(--cm-color-em-highlight, var(--color-base2));
+  --color-variable-2:           var(--cm-color-variable-2, var(--color-solar-yellow));
+  --color-variable-2-highlight: var(--cm-color-variable-2-highlight, var(--color-solar-green));
+  --color-hr:                   var(--cm-color-hr, var(--color-base01));
+  /* --color-selected:             var(--cm-color-selected, pink); */
   
-  --cm-variable-final-font-family:          var(--cm-font-family, 'Merriweather', serif);
-  --cm-variable-final-color-base03:         var(--cm-color-base03, #002b36);
-  --cm-variable-final-color-base02:         var(--cm-color-base02, #073642);
-  --cm-variable-final-color-base01:         var(--cm-color-base01, #586e75);
-  --cm-variable-final-color-base00:         var(--cm-color-base00, #657b83);
-  --cm-variable-final-color-base0:          var(--cm-color-base0, #839496);
-  --cm-variable-final-color-base1:          var(--cm-color-base1, #93a1a1);
-  --cm-variable-final-color-base2:          var(--cm-color-base2, #eee8d5);
-  --cm-variable-final-color-base3:          var(--cm-color-base3, #fdf6e3);
-  --cm-variable-final-color-solar-yellow:   var(--cm-color-solar-yellow, #b58900);
-  --cm-variable-final-color-solar-orange:   var(--cm-color-solar-orange, #cb4b16);
-  --cm-variable-final-color-solar-red:      var(--cm-color-solar-red, #dc322f);
-  --cm-variable-final-color-solar-magenta:  var(--cm-color-solar-magenta, #d33682);
-  --cm-variable-final-color-solar-violet:   var(--cm-color-solar-violet, #6c71c4);
-  --cm-variable-final-color-solar-blue:     var(--cm-color-solar-blue, #268bd2);
-  --cm-variable-final-color-solar-cyan:     var(--cm-color-solar-cyan, #2aa198);
-  --cm-variable-final-color-solar-green:    var(--cm-color-solar-green, #859900);
 
 
   line-height: 2rem;
   color-profile: sRGB;
   rendering-intent: auto;
-  font-family: var(--cm-variable-final-font-family);
+  
+  
+  font-family: var(--font-family);
+  font-weight: var(--weight-body);
+  color: var(--color-body)
+
 
 }
+
+.cm-s-variable .CodeMirror-selected { background: var(--color-selected); }
+.cm-s-variable .cm-header { color: var(--color-header); }
+.cm-s-variable .cm-header.cm-formatting { color: var(--color-header-highlight); }
+.cm-s-variable .cm-quote { color: var(--color-quote); }
+.cm-s-variable .cm-quote.cm-formatting { color: var(--color-quote-highlight); }
+.cm-s-variable .cm-link { color: var(--color-link); cursor: pointer; }
+.cm-s-variable .cm-link.cm-formatting { color: var(--color-link-highlight); cursor: pointer; }
+.cm-s-variable .cm-em { color: var(--color-em); }
+.cm-s-variable .cm-em.cm-formatting { color: var(--color-em-highlight); }
+.cm-s-variable .cm-variable-2 { color: var(--color-variable-2); }
+.cm-s-variable .cm-variable-2.cm-formatting { color: var(--color-variable-2-highlight); }
+.cm-s-variable .cm-hr {
+  color: transparent;
+  border-top: 1px solid var(--color-hr);
+  display: block;
+}
+
+
+/*
+largely copy pasted from 
+Solarized theme for code-mirror
+http://ethanschoonover.com/solarized
+
+Styles relevant to markdown appear above
+*/
 
 .cm-s-variable .CodeMirror-widget {
   text-shadow: none;
 }
 
-.cm-s-variable .cm-header { color: var(--cm-variable-final-color-base01); }
-.cm-s-variable .cm-quote { color: var(--cm-variable-final-color-base1); }
 
-.cm-s-variable .cm-keyword { color: var(--cm-variable-final-color-solar-orange); }
-.cm-s-variable .cm-atom { color: var(--cm-variable-final-color-solar-magenta); }
-.cm-s-variable .cm-number { color: var(--cm-variable-final-color-solar-magenta); }
-.cm-s-variable .cm-def { color: var(--cm-variable-final-color-solar-cyan); }
+.cm-s-variable .cm-keyword { color: var(--color-solar-orange); }
+.cm-s-variable .cm-atom { color: var(--color-solar-magenta); }
+.cm-s-variable .cm-number { color: var(--color-solar-magenta); }
+.cm-s-variable .cm-def { color: var(--color-solar-cyan); }
 
-.cm-s-variable .cm-variable { color: var(--cm-variable-final-color-base0); }
-.cm-s-variable .cm-variable-2 { color: var(--cm-variable-final-color-solar-yellow); }
-.cm-s-variable .cm-variable-3, .cm-s-variable .cm-type { color: var(--cm-variable-final-color-solar-violet); }
+.cm-s-variable .cm-variable { color: var(--color-base0); }
+.cm-s-variable .cm-variable-3, .cm-s-variable .cm-type { color: var(--color-solar-violet); }
 
-.cm-s-variable .cm-property { color: var(--cm-variable-final-color-solar-cyan); }
-.cm-s-variable .cm-operator { color: var(--cm-variable-final-color-solar-violet); }
+.cm-s-variable .cm-property { color: var(--color-solar-cyan); }
+.cm-s-variable .cm-operator { color: var(--color-solar-violet); }
 
-.cm-s-variable .cm-comment { color: var(--cm-variable-final-color-base01); font-style:italic; }
+.cm-s-variable .cm-comment { color: var(--color-base01); font-style:italic; }
 
-.cm-s-variable .cm-string { color: var(--cm-variable-final-color-solar-green); }
-.cm-s-variable .cm-string-2 { color: var(--cm-variable-final-color-solar-yellow); }
+.cm-s-variable .cm-string { color: var(--color-solar-green); }
+.cm-s-variable .cm-string-2 { color: var(--color-solar-yellow); }
 
-.cm-s-variable .cm-meta { color: var(--cm-variable-final-color-solar-green); }
-.cm-s-variable .cm-qualifier { color: var(--cm-variable-final-color-solar-yellow); }
-.cm-s-variable .cm-builtin { color: var(--cm-variable-final-color-solar-magenta); }
-.cm-s-variable .cm-bracket { color: var(--cm-variable-final-color-solar-orange); }
-.cm-s-variable .CodeMirror-matchingbracket { color: var(--cm-variable-final-color-solar-green); }
-.cm-s-variable .CodeMirror-nonmatchingbracket { color: var(--cm-variable-final-color-solar-red); }
-.cm-s-variable .cm-tag { color: var(--cm-variable-final-color-base1); }
-.cm-s-variable .cm-attribute { color: var(--cm-variable-final-color-solar-cyan); }
-.cm-s-variable .cm-hr {
-  color: transparent;
-  border-top: 1px solid var(--cm-variable-final-color-base01);
-  display: block;
-}
-.cm-s-variable .cm-link { color: var(--cm-variable-final-color-base1); cursor: pointer; }
-.cm-s-variable .cm-special { color: var(--cm-variable-final-color-solar-violet); }
-.cm-s-variable .cm-em {
-  color: var(--cm-variable-final-color-base1);
-}
+.cm-s-variable .cm-meta { color: var(--color-solar-green); }
+.cm-s-variable .cm-qualifier { color: var(--color-solar-yellow); }
+.cm-s-variable .cm-builtin { color: var(--color-solar-magenta); }
+.cm-s-variable .cm-bracket { color: var(--color-solar-orange); }
+.cm-s-variable .CodeMirror-matchingbracket { color: var(--color-solar-green); }
+.cm-s-variable .CodeMirror-nonmatchingbracket { color: var(--color-solar-red); }
+.cm-s-variable .cm-tag { color: var(--color-base1); }
+.cm-s-variable .cm-attribute { color: var(--color-solar-cyan); }
+
+.cm-s-variable .cm-special { color: var(--color-solar-violet); }
+
 .cm-s-variable .cm-error,
 .cm-s-variable .cm-invalidchar {
-  color: var(--cm-variable-final-color-base01);
-  border-bottom: 1px dotted var(--cm-variable-final-color-solar-red);
+  color: var(--color-base01);
+  border-bottom: 1px dotted var(--color-solar-red);
 }
 
 /* Editor styling */
@@ -101,10 +130,10 @@ http://ethanschoonover.com/solarized/img/solarized-palette.png
 .cm-s-variable .CodeMirror-linenumber {
   padding: 0 5px;
 }
-.cm-s-variable .CodeMirror-guttermarker-subtle { color: var(--cm-variable-final-color-base01); }
+.cm-s-variable .CodeMirror-guttermarker-subtle { color: var(--color-base01); }
 
 .cm-s-variable .CodeMirror-gutter .CodeMirror-gutter-text {
-  color: var(--cm-variable-final-color-base01);
+  color: var(--color-base01);
 }
 
 /* Cursor */
