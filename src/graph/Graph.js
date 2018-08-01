@@ -1,151 +1,119 @@
-import React, {Component, createRef} from 'react'
-import * as d3 from 'd3'
-import * as d3bbox from 'd3-bboxCollide'
-export class Graph extends Component {
-  
-  
-  container = undefined
-  setContainer = container => {
-    if (!this.container) {
-      this.container = container
-      this.onContainerAdded()
+
+import {createNode} from './GraphNode'
+import * as mobx from 'mobx'
+import uuid from 'uuid/v4'
+
+export function createWorkspace() {
+  return mobx.observable({
+    nodes: [],
+    selected: null,
+    lastSelected: null,
+    screen: createScreen(),
+    createNode({ x, y, parent }) {
+      const node = createNode(this, { x, y, parent})
+      this.nodes.push(node);
+      return node;
+    },
+    unregister(node) {
+      const idx = this.nodes.indexOf(node)
+      if (idx > -1) {
+        this.nodes.splice(idx, 1)
+      }
+    },
+    select(nodeOrNull) {
+      this.selected = nodeOrNull;
+      if (nodeOrNull) {
+        this.lastSelected = nodeOrNull
+      }
+    },
+    get links() {
+      const ls = []
+      for (let node of this.nodes) {
+        for (let c of node.children) {
+          ls.push([node, c])
+        }
+      }
+      return ls;
     }
-  }
 
-  onContainerAdded() {
     
-    window.container = this.container
-    window.d3 = d3
-    draw(this.container)
-    
-  }
-
-  render() {
-    return <div style={{width: '300px', height: '300px'}} ref={this.setContainer} />
-  }
-
+  }, {
+    createNode: mobx.action,
+    unregister: mobx.action,
+    select: mobx.action,
+    links: mobx.computed,
+  })
 }
 
-function draw(container) {
+function sig(x) {
+  return 1 / (1 + Math.exp(-x))
+}
 
-  var width = document.body.clientWidth
-  var height = document.body.clientHeight
-  var nodes = [{
-    id: 'A',
-    x: 100, y: 100
+
+function createScreen() {
+  return mobx.observable({
+    zoom: 1,
+    gridTop: 0,
+    gridLeft: 0,
+    clientWidth: 0,
+    clientHeight: 0,
+    element: null,
+    attach(element) {
+      this.element = element
+      this.clientWidth = element.clientWidth
+      this.clientHeight = element.clientHeight
+    },
+    modifyZoom(center, factor) {
+      const zoomChange = ((sig(factor / 1000) * 2) - 1) * this.zoom
+      
+      const z = this.zoom
+      // equivalent to (sort of optimization of)
+      // const beforeY = (center.y / this.zoom)
+      // const afterY = (center.y / (this.zoom + zoomChange))
+      // const changeTop = beforeY - afterY
+      const denominator = z * z + z * zoomChange
+      const changeTop = (center.y * zoomChange) / denominator 
+      const changeLeft = (center.x * zoomChange) / denominator
+      this.zoom += zoomChange
+      this.gridTop += changeTop
+      this.gridLeft += changeLeft
+     
+      
+    },
+    get gridBottom() {
+      return this.gridTop + this.clientHeight
+    },
+    get gridRight() {
+      return this.gridLeft + this.clientWidth
+    }
   }, {
-    id: 'B',
-    x: 100, y: 100
-  }, {
-    id: 'C',
-    x: 100, y: 100
-  }, {
-    id: 'D',
-    x: 100, y: 100
-  }, {
-    id: 'E',
-    x: 100, y: 100
-  }]
+    attach: mobx.action,
+    modifyZoom: mobx.action,
+    gridBottom: mobx.computed,
+    gridRight: mobx.computed
+  })
+}
 
-  var links = [
-    {source: 'A', target: 'B'},
-    {source: 'A', target: 'C'},
-    {source: 'C', target: 'D'},
-    {source: 'C', target: 'E'},
-  ]
-
-  var chart = d3.select(container)
-  
-  var svg = chart.append('svg').attr('width', width).attr('height', height)
-
-  var draggable = d3.drag()
-  .on('start', dragstarted)
-  .on('drag', dragged)
-  .on('end', dragended)
-    
-  function dragstarted() {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d3.event.subject.fx = d3.event.subject.x;
-    d3.event.subject.fy = d3.event.subject.y;
+/**
+ * 
+ * @param {x: number, y: number} coordinates 
+ * @param {zoom: number, centerX: number, centerY: number, clientWidth: number, clientHeight: number} screen 
+ * @return {x: number, y: number}
+ */
+export function gridToScreen(coordinates, screen) {
+  return {
+    x: (coordinates.x - screen.gridLeft) * screen.zoom,
+    y: (coordinates.y - screen.gridTop) * screen.zoom
   }
-  
-  function dragged() {
-    d3.event.subject.fx = d3.event.x;
-    d3.event.subject.fy = d3.event.y;
+}
+
+/*
+screen = (grid - screenStart) * zoom
+(screen / zoom) + start = grid
+*/
+export function screenToGrid(coordinates, screen) {
+  return {
+    x: (coordinates.x / screen.zoom) + screen.gridLeft,
+    y: (coordinates.y / screen.zoom) + screen.gridTop,
   }
-  
-  function dragended() {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d3.event.subject.fx = null;
-    d3.event.subject.fy = null;
-  }
-  
-  
-  // const collide = d3.forceCollide()
-  //   .radius(x => 5)
-  //   .strength(10)
-
-  const collide = d3bbox.bboxCollide(nodes)
-    .bbox($ => [[$.x - 10, $.y - 5], [$.x + 10, $.y + 5]])
-  const link = d3.forceLink()
-    .id(x => x.id)
-    .distance(x => 60)
-    .links(links)
-
-  var simulation = d3.forceSimulation(nodes)
-    .force('collide', collide)
-    .force('link', link)
-    .on('tick', ticked);
-
-  function ticked() {
-    
-    var l = svg
-      .selectAll('line.edges')
-      .data(links)
-
-    l.enter()
-    .append('line')
-    .attr('class', 'edges')
-    .attr('style', 'stroke:rgb(255,0,0);stroke-width:2')
-    .merge(l)
-    .attr('x1', d => d.source.x)
-    .attr('y1', d => d.source.y)
-    .attr('x2', d => d.target.x)
-    .attr('y2', d => d.target.y)
-    
-    l.exit().remove()
-
-    var u = svg
-      .selectAll('rect.nodes')
-      .data(nodes)
-
-    u.enter()
-      .append('rect')
-        .attr('class', 'nodes')
-        .attr('width', 20)
-        .attr('height', 10)
-      .merge(u)
-      .attr('x', d => d.x)
-      .attr('y', d => d.y)
-      .call(draggable)
-
-    u.exit().remove()
-
-    var btns = svg
-      .selectAll('circle.top-node-btn')
-      .data(nodes)
-
-    btns.enter()
-      .append('circle')
-        .attr('class', 'top-node-btn')
-        .attr('r', 5)
-        .attr('style', 'fill:rgb(255,255,255)')
-      .merge(btns)
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-
-    btns.exit().remove()
-  }
-
-
 }

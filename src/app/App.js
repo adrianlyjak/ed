@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {Editor} from '../editor/Editor';
-import {Graph} from '../graph/Graph';
-import {GraphNode} from '../graph/GraphNode'
+import {GraphView} from '../graph/GraphView';
+
 
 class App extends Component {
   render() {
     return (
       <div>
-        <Graph />
+        <GraphView />
       </div>
     );
   }
