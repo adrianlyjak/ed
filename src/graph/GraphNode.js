@@ -1,8 +1,8 @@
 import uuid from 'uuid/v4'
 import * as mobx from 'mobx'
-import {gridToScreen} from './Graph'
 
-export function createNode(workspace, {
+
+export function GraphNode(workspace, {
   x = 0, y = 0, 
   width = 60, height = 60,
   parent = null
@@ -47,15 +47,6 @@ export function createNode(workspace, {
     },
     get isSelected() {
       return this.workspace.selected === this
-    },
-    get screen() {
-      return gridToScreen(this, this.workspace.screen)
-    },
-    get screenWidth() {
-      return this.workspace.screen.zoom * this.width
-    },
-    get screenHeight() {
-      return this.workspace.screen.zoom * this.height
     }
   }, {
     unlinkParent: mobx.action,
@@ -63,9 +54,6 @@ export function createNode(workspace, {
     resortChildren: mobx.action,
     setSelected: mobx.action,
     isSelected: mobx.computed,
-    screen: mobx.computed,
-    screenWidth: mobx.computed,
-    screenHeight: mobx.computed,
   })
   if (parent) {
     self.linkParent(parent)

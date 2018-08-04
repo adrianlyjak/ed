@@ -1,9 +1,9 @@
 import React, {Component} from 'react'
-import {createWorkspace, screenToGrid} from './Graph'
+import {Workspace} from './Graph'
 import {observer} from 'mobx-react'
 import * as mobx from 'mobx'
-import {ClickHandler} from './ClickHandler'
-import {attachSimulation} from './simulation'
+import PropTypes from 'prop-types'
+import {Screen, screenToGrid} from './Screen'
 
 
 export const GraphView = observer(class GraphView extends Component {
@@ -13,100 +13,160 @@ export const GraphView = observer(class GraphView extends Component {
     this._state.lastActiveNode = node;
   }
 
-  onNodeDragEnd = (node) => {
+  onNodeDragEnd = (event) => {
     this._state.activeNode = null
   }
 
   _state = (() => {
-    const y = document.body.clientHeight;
-    const x = document.body.clientWidth;
-    const ws = createWorkspace();
-    attachSimulation(ws)
-    ws.screen.attach(document.body)
+    const ws = Workspace();
+    const screen = Screen(ws, document.body);
+    const editorState = EditorState(screen)
     
-    ws.createNode({ x: x / 2, y: y / 2 })
-    ws.createNode({ x: x, y: y })
-    ws.createNode({ x: 0, y: 0 })
-    ws.createNode({ x: x * 0.75, y: y * 0.75 })
+    const {clientWidth: x, clientHeight: y} = screen
     
+    
+    ws.createNode({ x: x * 0.5, y: y * 0.5 })
+
+    ws.createNode({ x: x * 0.25, y: y * 0.75})
+    ws.createNode({ x: x * 0.75, y: y * 0.75})
+    ws.createNode({ x: x * 0.75, y: y * 0.25 })
+    ws.createNode({ x: x * 0.25, y: y * 0.25 })
+    
+
     return mobx.observable({
-      ws, x, y, activeNode: null, lastActiveNode: null
+      ws, screen,
+      editorState,
     })
   })()
 
 
   onMouseMove = (event) => {
-    if (this._state.ws.selected) {
-      this._state.ws.selected.clickHandler.onMouseMove(event)
-    }
+    this._state.editorState.onNodeDrag(event)
   }
 
   onMouseDown = (event) => {
-    const {x, y} = screenToGrid({ x: event.clientX, y: event.clientY }, this._state.ws.screen)
+    const {x, y} = screenToGrid({ x: event.clientX, y: event.clientY }, this._state.screen)
+    console.log({ 'event.clientX': event.clientX, x, zoom: this._state.screen.zoom })
     const node = this._state.ws.createNode({ x, y, parent: this._state.lastActiveNode})
     node.x -= node.width / 2
     node.y -= node.height / 2
   }
+  
   onScroll = (event) => {
-    this._state.ws.screen.modifyZoom({x: event.clientX, y: event.clientY}, event.deltaY)
+    this._state.screen.modifyZoom({x: event.clientX, y: event.clientY}, event.deltaY)
     event.preventDefault()
   }
 
   render() {
-    const {x,y,ws} = this._state
+    const { ws, screen, editorState } = this._state
     return <div 
     onWheel={this.onScroll}
-    style={{width: x, height: y}} >
+    style={{width: screen.clientWidth, height: screen.clientHeight}} >
       <svg 
-        width={x} height={y}
+        width={screen.clientWidth} height={screen.clientHeight}
         onMouseMove={this.onMouseMove}
         onMouseDown={this.onMouseDown}
       >
+      <div style={{width: '300px', color: 'blue', height: '300px'}} />
       {
-        ws.links.map(([a, b]) => <GraphNodeLine key={a.id + b.id} source={a} target={b}/>)
+        ws.links.map(([a, b]) => <GraphNodeLine 
+          key={a.id + b.id} 
+          source={screen.nodeProjections.get(a.id)} 
+          target={screen.nodeProjections.get(b.id)}
+          />)
       }
       {
-        ws.nodes.map(n => <GraphNodeView key={n.id} node={n} workspace={this._state.ws}/>)
+        ws.nodes.map(n => 
+          <GraphNodeView 
+            key={n.id} 
+            node={n}
+            projection={screen.nodeProjections.get(n.id)} 
+            editorState={editorState}
+            />)
       }
-      
+      {
+        !screen.zoomCenter ? undefined : <circle 
+          cx={screen.zoomCenter.x} cy={screen.zoomCenter.y} r={5} fill="blue"
+        />
+      }
       </svg>
     </div>
   }
 
 })
 
+function EditorState(screen) {
+  return mobx.observable({
+    selected: null,
+    dragging: null,
+    draggingLastPosition: null,
+    onNodeDragStart(node, event) {
+      event.stopPropagation()
+      this.selected = node
+      this.dragging = node
+      this.draggingLastPosition = [event.clientX, event.clientY]
+    },
+    onNodeDragEnd(event) {
+      this.dragging = null
+      this.draggingLastPosition = null
+    },
+    onNodeDrag(event) {
+      if (this.dragging) {
+        const [lastX, lastY] = this.draggingLastPosition
+        const node = this.dragging
+        node.x += (event.clientX - lastX) * screen.zoom
+        node.y += (event.clientY - lastY) * screen.zoom
+        this.draggingLastPosition = [event.clientX, event.clientY]
+      }
+    },
+  })
+  
+}
+/**
+ * 
+ */
 const GraphNodeLine = observer(class GraphNodeLine extends Component {
   render() {
     const a = this.props.source
     const b = this.props.target
-    const { x: ax, y: ay } = a.screen
-    const { x: bx, y: by } = b.screen
+  
     return <line
       style={{stroke: 'rgb(255,0,0)', strokeWidth: 2}}
-      x1={ax + a.screenWidth / 2} y1={ay + a.screenHeight / 2}
-      x2={bx + b.screenWidth / 2} y2={by + b.screenHeight / 2}
+      x1={a.x + a.width / 2} y1={a.y + a.height / 2}
+      x2={b.x + b.width / 2} y2={b.y + b.height / 2}
     />
   }
 })
 
+/**
+ * 
+ */
 const GraphNodeView = observer(class GraphNodeView extends Component {
-  constructor(props) {
-    super(props)
-    this.clickHandler = ClickHandler(this.props.node)
-    this.props.node.clickHandler = this.clickHandler
-    this.clickHandler.on('dragstart', this.props.parent.onNodeDragStart)
-    this.clickHandler.on('dragend', this.props.parent.onNodeDragEnd)
+  static propTypes = {
+    workspace: PropTypes.any,
+    node: PropTypes.any,
+    projection: PropTypes.any,
+  }
+
+  onMouseDown = (event) => {
+    this.props.editorState.onNodeDragStart(this.props.node, event)
+  }
+  onMouseUp = (event) => {
+    this.props.editorState.onNodeDragEnd(event)
   }
   render() {
-    const clickHandler = this.clickHandler
-    const n = this.props.node
-    const {x,y} = n.screen
-    const width = n.screenWidth
-    const height = n.screenHeight
-    return <rect
-      width={width} height={height} x={x} y={y} 
-      onMouseDown={clickHandler.onMouseDown}
-      onMouseUp={clickHandler.onMouseUp}
-    />
+
+    const { projection } = this.props
+    const { x, y, width, height } = projection
+    return <React.Fragment>
+      <rect
+        width={width} 
+        height={height} 
+        x={x} 
+        y={y} 
+        onMouseDown={this.onMouseDown}
+        onMouseUp={this.onMouseUp}
+      />
+    </React.Fragment>
   }
 })
