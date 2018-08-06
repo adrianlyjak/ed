@@ -67,32 +67,81 @@ export const GraphView = observer(class GraphView extends Component {
         onMouseMove={this.onMouseMove}
         onMouseDown={this.onMouseDown}
       >
-      <div style={{width: '300px', color: 'blue', height: '300px'}} />
+      <Nodes screen={screen} ws={ws} editorState={editorState} />
       {
-        ws.links.map(([a, b]) => <GraphNodeLine 
-          key={a.id + b.id} 
-          source={screen.nodeProjections.get(a.id)} 
-          target={screen.nodeProjections.get(b.id)}
-          />)
+        Array(Math.round(screen.clientWidth / 10)).fill(null).map((x, i) => <line
+        key={i}
+        style={{stroke: 'rgb(200,200,200)', strokeWidth: 2}}
+        x1={i * 10} y1={0}
+        x2={i * 10} y2={10}
+      />)
       }
       {
-        ws.nodes.map(n => 
-          <GraphNodeView 
-            key={n.id} 
-            node={n}
-            projection={screen.nodeProjections.get(n.id)} 
-            editorState={editorState}
-            />)
+        Array(Math.round(screen.clientHeight / 10)).fill(null).map((x, i) => <line
+        key={i}
+        style={{stroke: 'rgb(200,200,200)', strokeWidth: 2}}
+        x1={0} y1={i * 10}
+        x2={10} y2={i * 10}
+      />)
+      }
+      {
+        screen.everySome.map((otherScreen, i) => {
+          return <Nodes fillOpacity={0.5 / (screen.everySome.length - i)} screen={otherScreen} ws={ws} editorState={editorState} />
+        })
       }
       {
         !screen.zoomCenter ? undefined : <circle 
           cx={screen.zoomCenter.x} cy={screen.zoomCenter.y} r={5} fill="blue"
         />
       }
+      
       </svg>
     </div>
   }
 
+})
+
+/**
+ * 
+ * matrix(
+      ${screen.zoom}, 
+      0, 
+      0, 
+      ${screen.zoom}, 
+      ${screen.leftOffset * screen.zoom}, 
+      ${screen.topOffset * screen.zoom}
+    )}
+ */
+const Nodes = observer(function Nodes({ screen, ws, editorState, ...props }) {
+  return <g
+    {...props}
+    style={{ transform: `matrix(
+      ${1 / screen.zoom}, 
+      0, 
+      0, 
+      ${1 / screen.zoom}, 
+      ${-screen.leftOffset}, 
+      ${-screen.topOffset}
+    )
+    `
+  }}
+  >
+    {
+      ws.links.map(([a, b]) => <GraphNodeLine
+        key={a.id + b.id}
+        source={a}
+        target={b}
+      />)
+    }
+    {
+      ws.nodes.map(n =>
+        <GraphNodeView
+          key={n.id}
+          node={n}
+          editorState={editorState}
+        />)
+    }
+  </g>
 })
 
 function EditorState(screen) {
@@ -145,7 +194,6 @@ const GraphNodeView = observer(class GraphNodeView extends Component {
   static propTypes = {
     workspace: PropTypes.any,
     node: PropTypes.any,
-    projection: PropTypes.any,
   }
 
   onMouseDown = (event) => {
@@ -156,8 +204,8 @@ const GraphNodeView = observer(class GraphNodeView extends Component {
   }
   render() {
 
-    const { projection } = this.props
-    const { x, y, width, height } = projection
+    const { node } = this.props
+    const { x, y, width, height } = node
     return <React.Fragment>
       <rect
         width={width} 
