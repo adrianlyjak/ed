@@ -8,9 +8,16 @@ export function Workspace() {
     nodes: [],
     selected: null,
     lastSelected: null,
-    createNode({ x, y, parent }) {
-      const node = GraphNode(this, { x, y, parent})
+    createNode({ parent } = {}) {
+      const node = GraphNode(this, { parent})
       this.nodes.push(node);
+      if (parent) {
+        node.x = parent.x + 100
+        node.y = (parent.children.length - 1) * 100 + parent.y
+      } else {
+        node.x = 50
+        node.y = 50
+      }
       return node;
     },
     unregister(node) {

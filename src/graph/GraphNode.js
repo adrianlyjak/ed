@@ -1,15 +1,19 @@
 import uuid from 'uuid/v4'
 import * as mobx from 'mobx'
+import {GraphNodeView, GraphNodeLine } from './GraphNodeView'
+import getPhrase from './getPhrase'
 
+const scale = 50
 
 export function GraphNode(workspace, {
   x = 0, y = 0, 
-  width = 60, height = 60,
+  width = scale + Math.random() * scale, height = scale + Math.random() * scale,
   parent = null
 }) {
   const self = mobx.observable({
     x, y, width, height,
     id: uuid(),
+    title: getPhrase(),
     children: [],
     workspace,
     parent: parent,
@@ -26,12 +30,6 @@ export function GraphNode(workspace, {
       this.unlinkParent()
       this.parent = parent
       this.parent.children.push(this)
-      this.parent.resortChildren()
-    },
-    resortChildren() {
-      this.parent && this.parent.children.sort((a, b) => {
-        return a.y - b.y
-      })
     },
     delete() {
       this.children.slice().forEach(x => x.unlinkParent());
@@ -51,7 +49,6 @@ export function GraphNode(workspace, {
   }, {
     unlinkParent: mobx.action,
     linkParent: mobx.action,
-    resortChildren: mobx.action,
     setSelected: mobx.action,
     isSelected: mobx.computed,
   })

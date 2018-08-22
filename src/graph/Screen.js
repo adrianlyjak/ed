@@ -23,13 +23,13 @@ export function Screen(ws, element = null) {
 
   const self = mobx.observable({
     /** number of grid units per screen pixel */
-    zoom: 1.5,
+    zoom: 1,
     
     /** offset of screen from grid y zero in pixels */
-    topOffset: 40,
+    topOffset: 0,
 
     /** offset of screen from grid x zero in pixels */
-    leftOffset: 20,
+    leftOffset: 0,
 
     /** offset of screen from grid y zero in grid units */
     get gridTopOffset() {
@@ -49,9 +49,6 @@ export function Screen(ws, element = null) {
     /** height of the screen viewport, in pixels  */
     clientHeight: element.clientHeight || 0,
 
-    /** cursor position while a zoom is occuring */
-    zoomCenter: null,
-
     /** 
      * graph node positions within the screen. A screen observes it's workspace's nodes and adds and removes projections
      * projections compute their values from the screen and the source node
@@ -59,7 +56,19 @@ export function Screen(ws, element = null) {
     nodeProjections: mobx.observable.map(),
 
     get everySome() {
-      return this.prev.filter((x, i) => i % i === 0)
+      return this.prev.filter((x, i) => i % 20 === 0)
+    },
+
+    fit([[minX, minY], [maxX, maxY]]) {
+      const [gridX, gridY] = [maxX - minX, maxY - minY]
+      const [zoomX, zoomY] = [gridX / this.clientWidth, gridY / this.clientHeight]
+
+      this.zoom = Math.max(zoomX, zoomY)
+      const diffX = this.clientWidth - gridX / this.zoom
+      const diffY = this.clientHeight - gridY / this.zoom
+      
+      this.topOffset = minY / this.zoom - diffY / 2
+      this.leftOffset = minX / this.zoom - diffX / 2
     },
 
     modifyZoom(center, factor) {
@@ -67,7 +76,7 @@ export function Screen(ws, element = null) {
       this.prev.push({ topOffset: this.topOffset, leftOffset: this.leftOffset, zoom: this.zoom })
       // sig to squish values,
       // sig is ranged (0, 1), * 2 - 1 to range (-1, 1)
-      const dampen = 0.01
+      const dampen = 0.005
       const zoomChange = ((sig(factor * dampen) * 2) - 1) * this.zoom
       const z = this.zoom
       const nextZ = Math.min(Math.max(this.zoom + zoomChange, 0.01), 100)
@@ -76,8 +85,6 @@ export function Screen(ws, element = null) {
       this.topOffset += changeY
       this.leftOffset += changeX
       this.zoom = nextZ      
-      this.zoomCenter = gridToScreen(screenToGrid(center, this), this) 
-      console.log({ z, topOffset: this.topOffset, leftOffset: this.leftOffset})
     },
     
     dispose() {
@@ -87,6 +94,7 @@ export function Screen(ws, element = null) {
   }, {
     // attach: mobx.action,
     modifyZoom: mobx.action,
+    fit: mobx.action,
     everySome: mobx.computed,
     gridTopOffset: mobx.computed,
     gridLeftOffset: mobx.computed,
@@ -114,10 +122,6 @@ export function Screen(ws, element = null) {
 
 function Projection(node, screen) {
   const self =  mobx.observable({
-    last: [],
-    // get everyTen() {
-    //   return this.last.filter((x, i) => i % 10 === 0)
-    // },
     get x() {
       return node.x //return gToS(node.x, screen.leftOffset, screen.zoom)
     },
@@ -129,6 +133,13 @@ function Projection(node, screen) {
     },
     get height() {
       return node.height //return node.height / screen.zoom
+    },
+    get isOnScreen() {
+      const {x, y} = gridToScreen(node, screen)
+      const halfWidth = node.width / screen.zoom / 2
+      const halfHeight = node.height / screen.zoom / 2
+      return 0 <= x + halfWidth && x - halfWidth <= screen.clientWidth &&
+        0 <= y + halfHeight && y - halfHeight <= screen.clientHeight
     }
   }, {
     x: mobx.computed,
@@ -136,6 +147,7 @@ function Projection(node, screen) {
     // everyTen: mobx.computed,
     width: mobx.computed,
     height: mobx.computed,
+    isOnScreen: mobx.computed
   })
   
   // mobx.observe(screen, 'zoom', _.throttle(() => {
