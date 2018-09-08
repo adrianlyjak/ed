@@ -2,7 +2,6 @@ import jss from 'jss'
 
 export default function createTheme(materialUI) {
 
-  console.log(materialUI)
   const {primary, secondary, grey} = materialUI.palette
   const simpleColorsArray = [
     ['cm-header', 
@@ -62,7 +61,6 @@ export default function createTheme(materialUI) {
     ...materialUI.typography.body1
   }
 
-  console.log('shared', shared)
   return jss.createStyleSheet({
 
     materialUI: {

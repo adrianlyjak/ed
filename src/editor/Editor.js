@@ -33,8 +33,6 @@ const mui = createMuiTheme({
   },
 })
 const theme = createTheme(mui)
-console.log('foo is', theme.classes.foo)
-
 
 
 
