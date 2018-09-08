@@ -18,7 +18,7 @@ function calcOffsetChange(center, offset, zoom, nextZoom) {
   // return (sToG(center, offset, zoom) - sToG(center, offset, nextZoom)) / nextZoom
 }
 
-export function Screen(ws, element = null) {
+export function Screen(element = null) {
 
 
   const self = mobx.observable({
@@ -33,12 +33,12 @@ export function Screen(ws, element = null) {
 
     /** offset of screen from grid y zero in grid units */
     get gridTopOffset() {
-      
+      return this.topOffset * this.zoom
     },
 
     /** offset of screen from grid x zero in grid units */
     get gridLeftOffset() {
-      
+      return this.leftOffset * this.zoom
     },
 
     prev: [],
@@ -48,12 +48,6 @@ export function Screen(ws, element = null) {
 
     /** height of the screen viewport, in pixels  */
     clientHeight: element.clientHeight || 0,
-
-    /** 
-     * graph node positions within the screen. A screen observes it's workspace's nodes and adds and removes projections
-     * projections compute their values from the screen and the source node
-     */
-    nodeProjections: mobx.observable.map(),
 
     get everySome() {
       return this.prev.filter((x, i) => i % 20 === 0)
@@ -87,10 +81,6 @@ export function Screen(ws, element = null) {
       this.zoom = nextZ      
     },
     
-    dispose() {
-      nodeObserveDisposer()
-    }
-
   }, {
     // attach: mobx.action,
     modifyZoom: mobx.action,
@@ -98,16 +88,7 @@ export function Screen(ws, element = null) {
     everySome: mobx.computed,
     gridTopOffset: mobx.computed,
     gridLeftOffset: mobx.computed,
-    dispose: mobx.action
-  })
-  const nodeObserveDisposer = ws.nodes.observe(change => {
-    for (let add of change.added) {
-      self.nodeProjections.set(add.id, Projection(add, self))
-    }
-    for (let remove of change.removed) {
-      self.nodeProjections.delete(remove.id)
-    }
-    
+
   })
 
   function setWindowSize() {
@@ -116,44 +97,6 @@ export function Screen(ws, element = null) {
   }
   setWindowSize()
   window.addEventListener("resize", setWindowSize);
-  return self
-}
-
-
-function Projection(node, screen) {
-  const self =  mobx.observable({
-    get x() {
-      return node.x //return gToS(node.x, screen.leftOffset, screen.zoom)
-    },
-    get y() {
-      return node.y //return gToS(node.y, screen.topOffset, screen.zoom)
-    },
-    get width() {
-      return node.width //return node.width / screen.zoom
-    },
-    get height() {
-      return node.height //return node.height / screen.zoom
-    },
-    get isOnScreen() {
-      const {x, y} = gridToScreen(node, screen)
-      const halfWidth = node.width / screen.zoom / 2
-      const halfHeight = node.height / screen.zoom / 2
-      return 0 <= x + halfWidth && x - halfWidth <= screen.clientWidth &&
-        0 <= y + halfHeight && y - halfHeight <= screen.clientHeight
-    }
-  }, {
-    x: mobx.computed,
-    y: mobx.computed,
-    // everyTen: mobx.computed,
-    width: mobx.computed,
-    height: mobx.computed,
-    isOnScreen: mobx.computed
-  })
-  
-  // mobx.observe(screen, 'zoom', _.throttle(() => {
-  //   self.last.unshift({ x: self.x, y: self.y, width: self.width, height: self.height })
-  //   self.last.splice(60)
-  // }, 100, { leading: true }))
   return self
 }
 

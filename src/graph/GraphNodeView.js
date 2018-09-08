@@ -46,16 +46,15 @@ export const GraphNodeView = observer(class GraphNodeView extends Component {
   }
   render() {
     
-    const { node, editorState, screen } = this.props
-    const projection = screen.nodeProjections.get(node.id)
+    const { node, editorState } = this.props
     const { x, y, width, height } = node
-    return <React.Fragment>
+    return !node.isOnScreen ? <React.Fragment /> : <React.Fragment>
       <rect
         width={width} 
         height={height} 
         x={x - width/2} 
         y={y - height/2}
-        style={{fill: 'rgba(0,0,0,0.2)', ...(projection.isOnScreen ? {} : {display:'none'})}} 
+        style={{fill: 'rgba(0,0,0,0.2)'}} 
         onMouseDown={this.onMouseDown}
         onMouseUp={editorState.onNodeDragEnd}
       />
@@ -64,7 +63,7 @@ export const GraphNodeView = observer(class GraphNodeView extends Component {
         width={width} 
         height={height} 
         x={x - width/2} 
-        y={y - height/2}><div xmlns="http://www.w3.org/1999/xhtml" style={{fontSize: '5px'}}>{node.title}</div></foreignObject>
+        y={y - height/2}><div xmlns="http://www.w3.org/1999/xhtml" style={{fontSize: '5px'}}>{node.underlying.title}</div></foreignObject>
     </React.Fragment>
   }
 })

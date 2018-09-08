@@ -3,26 +3,46 @@ import {Workspace} from './Graph'
 import {observer} from 'mobx-react'
 import * as mobx from 'mobx'
 import PropTypes from 'prop-types'
-import {Screen, screenToGrid} from './Screen'
+import {Screen} from './Screen'
 import {EditorState} from './EditorState'
-import {loadDefault} from './sample'
+
 import {GraphNodeLine, GraphNodeView} from './GraphNodeView'
+
+import {buildRandomTree} from './buildRandomTree'
+import { TreeLayout } from './TreeLayout';
+
+
+
+function loadRandom(ws) {
+
+  function createNodes(prototype, parent = null) {
+    const node = ws.createNode({ parent })
+    prototype.children.forEach(x => createNodes(x, node))
+    return node
+  }
+  
+  createNodes(buildRandomTree())
+}
+
 
 export function createGraphViewState() {
   const ws = Workspace();
-  const screen = Screen(ws, document.body);
-  const editorState = EditorState(screen, ws)
-  loadDefault(ws)
-  const minX = Math.min(...ws.nodes.map(node => node.x - node.width / 2))
-  const maxX = Math.max(...ws.nodes.map(node => node.x + node.width / 2))
-  const minY = Math.min(...ws.nodes.map(node => node.y - node.height / 2))
-  const maxY = Math.max(...ws.nodes.map(node => node.y + node.height / 2))
+  loadRandom(ws)
+
+  const screen = Screen(document.body);
+  const editorState = EditorState(screen, ws);
+  const treeLayout = TreeLayout({ workspace: ws, screen })
+  const minX = Math.min(...treeLayout.values.map(node => node.x - node.width / 2))
+  const maxX = Math.max(...treeLayout.values.map(node => node.x + node.width / 2))
+  const minY = Math.min(...treeLayout.values.map(node => node.y - node.height / 2))
+  const maxY = Math.max(...treeLayout.values.map(node => node.y + node.height / 2))
 
   const margin = 100
   screen.fit([[minX - 100, minY - 100], [maxX + 100, maxY + 100]])
 
   return mobx.observable({
     ws, screen,
+    treeLayout,
     editorState,
   })
 }
@@ -30,7 +50,7 @@ export function createGraphViewState() {
 export const GraphView = observer(class GraphView extends Component {
   
   render() {
-    const { ws, screen, editorState } = this.props.state
+    const { ws, screen, editorState, treeLayout } = this.props.state
     return <div 
     onWheel={editorState.onScroll}
     style={{width: '100%', height: '100%'}} >
@@ -41,8 +61,8 @@ export const GraphView = observer(class GraphView extends Component {
         onMouseDown={editorState.onMouseDown}
         onMouseUp={editorState.onMouseUp}
       >
-      <Nodes screen={screen} ws={ws} editorState={editorState} />
-      <Ticks screen={screen} />
+      <Nodes screen={screen} ws={ws} editorState={editorState} treeLayout={treeLayout}/>
+      {/* <Ticks screen={screen} /> */}
       </svg>
     </div>
   }
@@ -70,7 +90,7 @@ const Ticks = observer(function Ticks({ screen }) {
   </React.Fragment>
 })
 
-const Nodes = observer(function Nodes({ screen, ws, editorState, ...props }) {
+const Nodes = observer(function Nodes({ screen, ws, editorState, treeLayout, ...props }) {
   return <g
     {...props}
     style={{ transform: `matrix(
@@ -88,8 +108,8 @@ const Nodes = observer(function Nodes({ screen, ws, editorState, ...props }) {
       ws.links
       .map(([a, b]) => <GraphNodeLine
         key={a.id + b.id}
-        source={a}
-        target={b}
+        source={treeLayout.get(a.id)}
+        target={treeLayout.get(b.id)}
       />)
     }
     {
@@ -98,7 +118,7 @@ const Nodes = observer(function Nodes({ screen, ws, editorState, ...props }) {
         <GraphNodeView
           key={n.id}
           screen={screen}
-          node={n}
+          node={treeLayout.get(n.id)}
           editorState={editorState}
         />)
     }

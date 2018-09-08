@@ -6,12 +6,9 @@ import getPhrase from './getPhrase'
 const scale = 50
 
 export function GraphNode(workspace, {
-  x = 0, y = 0, 
-  width = scale + Math.random() * scale, height = scale + Math.random() * scale,
   parent = null
 }) {
   const self = mobx.observable({
-    x, y, width, height,
     id: uuid(),
     title: getPhrase(),
     children: [],
@@ -34,7 +31,10 @@ export function GraphNode(workspace, {
     delete() {
       this.children.slice().forEach(x => x.unlinkParent());
       this.unlinkParent();
-      this.workspace.unregister(this);
+      const idx = this.workspace.nodes.indexOf(this)
+      if (idx > -1) {
+        this.workspace.nodes.splice(idx, 1)
+      }
     },
     setSelected(isSelected) {
       if (!isSelected && this.isSelected) {
