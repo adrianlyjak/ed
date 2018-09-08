@@ -4,5 +4,6 @@ import './index.css';
 import App from './app/App';
 
 console.log('hello from tsx')
-const TypedApp = App as any as typeof React.Component;
-ReactDOM.render(<TypedApp />, document.getElementById('root'));
+const el = document.createElement('div')
+document.body.appendChild(el)
+ReactDOM.render(<App />, el);

@@ -1,10 +1,9 @@
 import * as React from 'react';
-// import {createGraphViewState} from '../graph/GraphView';
+import {GraphView as Untyped} from '../graph/GraphView';
 import * as sess from '../session/loadSession';
 import { IApplicationSession } from '../session/ApplicationSession';
 
-// createGraphViewState()
-
+const GraphView = Untyped as any as typeof React.Component
 interface IAppState {
   loaded: boolean,
   failedToLoad: boolean,
@@ -34,11 +33,11 @@ export default class App extends React.Component<{}, IAppState, {}> {
   }
 
   render() {
-    return <div />
-    // return (
-    //   <div>
-    //     <GraphView state={state}/>
-    //   </div>
-    // );
+    
+    return (
+      <div>
+        <GraphView />
+      </div>
+    );
   }
 }

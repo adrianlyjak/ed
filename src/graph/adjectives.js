@@ -1,4 +1,4 @@
-[
+module.exports = [
   "different",
   "used",
   "important",
