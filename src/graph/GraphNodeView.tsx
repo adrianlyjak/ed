@@ -1,6 +1,9 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import * as React from 'react'
+import * as PropTypes from 'prop-types'
+import * as mobx from 'mobx'
 import {observer} from 'mobx-react'
+import { ITreeLayoutNode } from './TreeLayout';
+import { IEditorState } from './EditorState';
 /**
  * 
  */
@@ -8,7 +11,11 @@ import {observer} from 'mobx-react'
 function between(start, end)  {
   return start.map((dimension, i) => (dimension + end[i]) / 2)
 }
-export const GraphNodeLine = observer(class GraphNodeLine extends Component {
+
+
+
+
+export const GraphNodeLine = observer(class GraphNodeLine extends React.Component<{source: ITreeLayoutNode, target: ITreeLayoutNode}> {
   render() {
     const a = this.props.source
     const b = this.props.target
@@ -35,7 +42,10 @@ export const GraphNodeLine = observer(class GraphNodeLine extends Component {
 /**
  * 
  */
-export const GraphNodeView = observer(class GraphNodeView extends Component {
+export const GraphNodeView = observer(class GraphNodeView extends React.Component<{
+  editorState: IEditorState, 
+  node: ITreeLayoutNode
+}, {}, {}> {
   static propTypes = {
     editorState: PropTypes.any,
     node: PropTypes.any,
@@ -63,7 +73,7 @@ export const GraphNodeView = observer(class GraphNodeView extends Component {
         width={width} 
         height={height} 
         x={x - width/2} 
-        y={y - height/2}><div xmlns="http://www.w3.org/1999/xhtml" style={{fontSize: '5px'}}>{node.underlying.title}</div></foreignObject>
+        y={y - height/2}><div style={{fontSize: '5px'}}>{node.underlying.title}</div></foreignObject>
     </React.Fragment>
   }
 })

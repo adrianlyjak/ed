@@ -1,4 +1,10 @@
-export function parseTree(str) {
+export interface Node {
+  parent?: Node
+  children: Node[]
+  depth?: number
+}
+
+export function parseTree(str: string): Node {
   const depths = str.split('\n').map(x => {
     const split = x.split("")
     let depth = 0
@@ -7,7 +13,7 @@ export function parseTree(str) {
     }
     return depth
   })
-  const root = { children: [], depth: -1 }
+  const root: Node = { children: [], depth: -1 }
   var current = root
   for (let d of depths) {
     if (d < current.depth) {

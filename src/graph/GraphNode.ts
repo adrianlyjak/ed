@@ -1,14 +1,28 @@
-import uuid from 'uuid/v4'
+import * as uuid from 'uuid/v4'
 import * as mobx from 'mobx'
 import {GraphNodeView, GraphNodeLine } from './GraphNodeView'
 import getPhrase from './getPhrase'
+import { IWorkspace } from './Graph';
 
 const scale = 50
 
+export interface IGraphNode extends mobx.IObservableObject {
+  id: string
+  title: string
+  children: any[]
+  workspace: IWorkspace
+  parent?: IGraphNode
+  unlinkParent: () => void,
+  linkParent: (parent: IGraphNode) => void
+  delete: () => void
+  setSelected: (isSelected: boolean) => void
+  readonly isSelected: boolean
+}
+
 export function GraphNode(workspace, {
   parent = null
-}) {
-  const self = mobx.observable({
+}): IGraphNode {
+  const self: IGraphNode = mobx.observable({
     id: uuid(),
     title: getPhrase(),
     children: [],

@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {GraphView as Untyped} from '../graph/GraphView';
+import {GraphView, createGraphViewState} from '../graph/GraphView';
 import * as sess from '../session/loadSession';
 import { IApplicationSession } from '../session/ApplicationSession';
 
-const GraphView = Untyped as any as typeof React.Component
 interface IAppState {
   loaded: boolean,
   failedToLoad: boolean,
@@ -15,8 +14,10 @@ export default class App extends React.Component<{}, IAppState, {}> {
   state: IAppState = {
     loaded: false,
     failedToLoad: false,
-    appSession: null
+    appSession: null,
   }
+
+  viewState = createGraphViewState()
 
   componentDidMount() {
     console.log({sess})
@@ -36,7 +37,7 @@ export default class App extends React.Component<{}, IAppState, {}> {
     
     return (
       <div>
-        <GraphView />
+        <GraphView state={this.viewState}/>
       </div>
     );
   }

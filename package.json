@@ -30,7 +30,9 @@
     "whatwg-fetch": "2.0.4",
     "wolfy87-eventemitter": "^5.2.5"
   },
-  "scripts": {},
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
   "browserslist": {
     "development": [
       "last 2 chrome versions",

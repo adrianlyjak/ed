@@ -1,11 +1,13 @@
+import {Node} from './parseTree'
+
 export function buildRandomTree({
   depth = 10,
   minDepth = 5,
   maxChildren = Math.floor(1 + Math.random() * 4),
   chanceHasChildren = 0.5,
-} = {}) {
+} = {}): Node {
 
-  function descend(node = {children: []}, currentDepth = 0) {
+  function descend(node: Node = {children: []}, currentDepth = 0) {
     if (currentDepth <= depth && (Math.random() <= chanceHasChildren) || currentDepth < minDepth) {
       node.children = Array(Math.ceil(Math.random() * maxChildren)).fill(null).map(x => {
         return {

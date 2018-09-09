@@ -1,22 +1,42 @@
 import * as mobx from 'mobx'
-import {screenToGrid} from './Screen'
+import {screenToGrid, IScreen} from './Screen'
+import { IWorkspace } from './Graph';
+import { WheelEventHandler, MouseEventHandler, MouseEvent, WheelEvent } from 'react';
+import { IGraphNode } from './GraphNode';
+import { ITreeLayoutNode } from './TreeLayout';
 
-export function EditorState(screen, workspace) {
-  const self = mobx.observable({
+export interface IEditorState extends mobx.IObservableObject {
+  selected?: ITreeLayoutNode
+  dragging?: ITreeLayoutNode
+  panning: boolean
+  panningLastPosition: number[]
+  draggingLastPosition: number[]
+  onNodeDragStart: (node: ITreeLayoutNode, event: MouseEvent<Element>) => void
+  onNodeDragEnd: MouseEventHandler<Element>
+  onNodeDrag: MouseEventHandler<Element>
+  onMouseDown: MouseEventHandler<Element>
+  onMouseUp: MouseEventHandler<Element>
+  onScroll: WheelEventHandler<Element>
+}
+
+export function EditorState(screen: IScreen, workspace: IWorkspace): IEditorState {
+  const self: IEditorState = mobx.observable({
     selected: null,
     dragging: null,
+    panning: false,
+    panningLastPosition: null,
     draggingLastPosition: null,
-    onNodeDragStart: (node, event) => {
+    onNodeDragStart: (node: ITreeLayoutNode, event: MouseEvent<Element>) => {
       event.stopPropagation()
       self.selected = node
       self.dragging = node
       self.draggingLastPosition = [event.clientX, event.clientY]
     },
-    onNodeDragEnd: (event) => {
+    onNodeDragEnd: (event: MouseEvent<Element>) => {
       self.dragging = null
       self.draggingLastPosition = null
     },
-    onNodeDrag: (event) => {
+    onNodeDrag: (event: MouseEvent<Element>) => {
       if (self.dragging) {
         const [lastX, lastY] = self.draggingLastPosition
         const node = self.dragging
@@ -30,7 +50,7 @@ export function EditorState(screen, workspace) {
         self.panningLastPosition = [event.clientX, event.clientY]
       }
     },
-    onMouseDown: (event) => {
+    onMouseDown: (event: MouseEvent<Element>) => {
       self.panning = true
       self.panningLastPosition = [event.clientX, event.clientY]
       // const {x, y} = screenToGrid({ x: event.clientX, y: event.clientY }, screen)
@@ -38,10 +58,10 @@ export function EditorState(screen, workspace) {
       // node.x -= node.width / 2
       // node.y -= node.height / 2
     },
-    onMouseUp: event =>{
+    onMouseUp: (event: MouseEvent<Element>) => {
       self.panning = false
     },
-    onScroll: (event) => {
+    onScroll: (event: WheelEvent) => {
       screen.modifyZoom({x: event.clientX, y: event.clientY}, event.deltaY)
       event.preventDefault()
     }
