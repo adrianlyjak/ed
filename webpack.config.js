@@ -14,4 +14,3 @@ const html = require('./config/html.webpack')
 
 
 module.exports = merge(defaults, typescript, browserfs, javascript, css, html)
-console.log(JSON.stringify(module.exports, undefined, 2))

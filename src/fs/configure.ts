@@ -1,3 +1,4 @@
+import * as promisify from 'util.promisify'
 // import { FileSystem } from 'browserfs/dist/node/core/file_system';
 let BrowserFS = require('browserfs')
 
@@ -14,8 +15,9 @@ try {
 
 BrowserFS.install(window)
 
-const loaded: Promise<void> = new Promise((res, rej) => {
-  BrowserFS.configure({ 
+const configure: (any) => Promise<void> = promisify(BrowserFS.configure)
+
+const loaded: Promise<void> = configure({ 
     fs: 'MountableFileSystem',
     options: {
       '/session': {
@@ -31,10 +33,9 @@ const loaded: Promise<void> = new Promise((res, rej) => {
         },
       }
     }
-  }, (e: any | undefined) => {
-    e ? rej(e) : res()
+  }).then(x => {
+    window['fs'] = require('fs')
   })
-})
 
 export function onceLoaded(): Promise<void> {
   return loaded

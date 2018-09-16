@@ -10,27 +10,34 @@ export interface IFlushOptions {
 export interface IFlushDisposer {
   (): Promise<void>
 }
+
 /**
  * 
  * @param path 
  * @param jsonSerializableObservable 
  * @param options 
  */
-export function flushJsonToDisk<T>(
+export function flushJsonToDisk(
   path: string, 
-  jsonSerializableObservable: mobx.IObservable & T, 
+  getJson: () => Object, 
   {
     throttle = 1000
   }: IFlushOptions = {}
 ): IFlushDisposer {
 
-  var next: T = null
+  var next: Object = null
   var current: Promise<void> = null
   
-  function flushNext(json: T) {
+  function flushNext(json: Object) {
     if (!current) {
-      current = promisify(fs.writeFile)(path, JSON.stringify(json))
-      current.then(x => {
+      current = flush(path, json)
+        .then(x => {
+          // log?
+        })
+        .catch(ex => {
+          console.error(`failed to flush to ${path}`, ex)
+        })
+      current.then(() => {
         current = null
         if (next) {
           flushNext(next)
@@ -41,11 +48,19 @@ export function flushJsonToDisk<T>(
       next = json
     }
   }
+  // persist it immediately if it doesn't exist
+  fs.exists(path, exists => {
+    if (!exists) {
+      flushNext(getJson())
+    }
+  })
 
   const throttledFlushNext = _.throttle(flushNext, throttle, { leading: false, trailing: true })
 
+  
+
   const disposeFlush = mobx.reaction(
-    () => mobx.toJS(jsonSerializableObservable),
+    () => getJson(),
     (json) => throttledFlushNext(json)
   )
 
@@ -61,13 +76,16 @@ export function flushJsonToDisk<T>(
       disposeFlush()
       next = null
       const watchDone = current ? current.then(() => {}) : Promise.resolve(null)
-      didDeactivate = watchDone.then(() => flush(path, jsonSerializableObservable))
+      didDeactivate = watchDone.then(() => flush(path, getJson()))
       return didDeactivate
     }
     
   }
 }
 
-export function flush(path: string, jsonSerializableObservable: mobx.IObservable): Promise<void> {
-  return promisify(fs.writeFile)(path, JSON.stringify(mobx.toJS(jsonSerializableObservable)))
+export function flush(
+  path: string, 
+  object: Object
+): Promise<void> {
+  return promisify(fs.writeFile)(path, JSON.stringify(object), { encoding: 'utf-8'})
 }

@@ -14,5 +14,10 @@ module.exports = {
   },
   resolve: {
     extensions: [ '.tsx', '.ts', '.js', '.jsx', 'json']
+  },
+  optimization: {
+    removeAvailableModules: false,
+    removeEmptyChunks: false,
+    splitChunks: false,
   }
 };
