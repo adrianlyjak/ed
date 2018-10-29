@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 
 import {sig} from './math'
 
+import {animate as animateChange } from '../util/animate'
 /**
  * 
  * @param {*} center - screen zoom center
@@ -18,15 +19,21 @@ function calcOffsetChange(center, offset, zoom, nextZoom) {
   // return (sToG(center, offset, zoom) - sToG(center, offset, nextZoom)) / nextZoom
 }
 
+export const throttle = 33
+export const throttleWithEaseOut = 50
+
 export interface IScreen extends mobx.IObservableObject {
   /** number of grid units per screen pixel */
   zoom: number
 
-  /** offset of screen from grid y zero in pixels */
+  /** offset of screen from grid y zero in screen pixels */
   topOffset: number
 
-  /** offset of screen from grid x zero in pixels */
+  /** offset of screen from grid x zero in screen pixels */
   leftOffset: number,
+
+  /** is in zooming state? */
+  zooming: boolean,
 
   /** offset of screen from grid y zero in grid units */
   readonly gridTopOffset: number
@@ -40,16 +47,74 @@ export interface IScreen extends mobx.IObservableObject {
   /** height of the screen viewport, in pixels  */
   clientHeight: number
 
+  requestEvents: () => void
+
   /** fit screen to rect [minX, minY], [maxX, maxY] */
   fit: (min: number[], max: number[]) => void
 
+  /**  */
+  pan: (x: number, y: number) => void
+
   /** */
   modifyZoom: (center: XY, factor: number) => void
+
+  /** */
+  animateZoomTo: (center: XY, duration?: number, modification?: number) => void
 }
 
 
 export function Screen(element = null) {
 
+
+
+  const animatedActionReducers = {
+    scroll: (updates: XY[]) => {
+      const y = updates.reduce((sum, { y }) => sum + y, 0)
+      const x = updates.reduce((sum, { x }) => sum + x, 0)
+      self.topOffset += y
+      self.leftOffset += x
+    },
+    setZoom: (updates: { zoom: number, center: XY}[]) => {
+      const {zoom: nextZ, center} = updates[updates.length - 1]
+      const z = self.zoom
+      const changeX = calcOffsetChange(center.x, self.leftOffset, z, nextZ)
+      const changeY = calcOffsetChange(center.y, self.topOffset, z, nextZ)
+      self.topOffset += changeY
+      self.leftOffset += changeX
+      self.zoom = nextZ
+    },
+    setZooming: (updates: boolean[]) => {
+      self.zooming = updates[updates.length - 1]
+    }
+  }
+
+  interface UpdateEvent<T> {
+    name: string,
+    update: T
+  }
+  let updates: Array<UpdateEvent<any>> = []
+
+
+  const doActions = _.throttle(mobx.action('screenDoActions', (isRender) => {
+      const actions = {}
+      for (let update of updates) {
+        const array = (actions[update.name] = actions[update.name] || [])
+        array.push(update.update)
+      }
+      for (let name of Object.keys(actions)) {
+        animatedActionReducers[name](actions[name])
+      }
+      updates = []
+  }), throttle, {
+    leading: true
+  })
+
+  function animate(events: {[name: string]: any}): void {
+    for (let key of Object.keys(events)) {
+      updates.push({ name: key, update: events[key]})
+    }
+    doActions(false)
+  }
 
   const self: IScreen = mobx.observable({
     
@@ -64,13 +129,17 @@ export function Screen(element = null) {
     get gridLeftOffset() {
       return self.leftOffset * self.zoom
     },
-
+    zooming: false,
     prev: [],
     clientWidth: element.clientWidth || 0,
     clientHeight: element.clientHeight || 0,
 
     get everySome() {
       return this.prev.filter((x, i) => i % 20 === 0)
+    },
+
+    requestEvents: () => {
+      // doActions(true)
     },
 
     fit([minX, minY]: number[], [maxX, maxY]: number[]) {
@@ -83,6 +152,28 @@ export function Screen(element = null) {
       
       self.topOffset = minY / self.zoom - diffY / 2
       self.leftOffset = minX / self.zoom - diffX / 2
+    },
+
+    pan(x, y) {
+      animate({ scroll: { x, y } })
+    },
+
+    animateScroll(deltaX: number, y: number, easing: (x: number) => number) {
+
+    },
+
+    animateZoomTo(center: XY, duration: number = 200, modification: number = 0.5) {
+      let start = self.zoom
+      let end = self.zoom * modification
+      let diff = end - start
+      animate({ setZooming: true })
+      animateChange(duration)((progress: number) => {
+        animate({ setZoom: { zoom: start + (diff * progress), center }})
+      })
+      .catch(() => {})
+      .then(() => {
+        setTimeout(() => animate({ setZooming: false }), throttleWithEaseOut * 2)
+      })
     },
 
     modifyZoom(center: XY, factor: number) {
@@ -108,7 +199,7 @@ export function Screen(element = null) {
     everySome: mobx.computed,
     gridTopOffset: mobx.computed,
     gridLeftOffset: mobx.computed,
-
+    requestEvents: mobx.action,
   })
 
   function setWindowSize() {
@@ -116,7 +207,7 @@ export function Screen(element = null) {
     self.clientHeight = element.clientHeight
   }
   setWindowSize()
-  window.addEventListener("resize", setWindowSize);
+  // window.addEventListener("resize", setWindowSize);
   return self
 }
 

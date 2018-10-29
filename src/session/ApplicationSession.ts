@@ -41,6 +41,7 @@ export function ApplicationSession(
     loadingProject: false,
     
     loadProject: (projectId: string) => {
+  
       return loadProjectSession(self, projectId).then(x => {
         console.log('activating...', projectId)
         return x.activate().then(() => x)

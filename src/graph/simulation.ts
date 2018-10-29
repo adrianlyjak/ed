@@ -1,8 +1,9 @@
 import * as d3bbox from 'd3-bboxCollide'
 import * as d3 from 'd3'
-import { IWorkspace } from './Graph';
+import { IGraph } from './Graph';
 
-export function attachSimulation(ws: IWorkspace): void {
+
+export function attachSimulation(ws: IGraph): void {
   const nodes = ws.nodes
 
   const collide = d3bbox.bboxCollide(nodes)

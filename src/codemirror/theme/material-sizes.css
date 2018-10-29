@@ -1,0 +1,22 @@
+.toosmall .cm-s-material-ui {
+  font-size: 0.4rem !important;
+  display: none;
+}
+.xs .cm-s-material-ui {
+  font-size: 0.7rem !important;
+}
+.sm .cm-s-material-ui {
+  font-size: 1.0rem !important;
+}
+.md .cm-s-material-ui {
+  font-size: 1.3rem !important;
+}
+.lg .cm-s-material-ui {
+  font-size: 1.8rem !important;
+}
+.xl .cm-s-material-ui {
+  font-size: 2.3rem !important;
+}
+.xxl .cm-s-material-ui {
+  font-size: 2.8rem !important;
+}

@@ -1,16 +1,15 @@
 import * as uuid from 'uuid/v4'
 import * as mobx from 'mobx'
-import {GraphNodeView, GraphNodeLine } from './GraphNodeView'
 import getPhrase from './getPhrase'
-import { IWorkspace } from './Graph';
+import { IGraph } from './Graph';
 
 const scale = 50
 
 export interface IGraphNode extends mobx.IObservableObject {
   id: string
-  title: string
+  content: string
   children: any[]
-  workspace: IWorkspace
+  workspace: IGraph
   parent?: IGraphNode
   unlinkParent: () => void,
   linkParent: (parent: IGraphNode) => void
@@ -24,7 +23,7 @@ export function GraphNode(workspace, {
 }): IGraphNode {
   const self: IGraphNode = mobx.observable({
     id: uuid(),
-    title: getPhrase(),
+    content: "**" + getPhrase() + "** " + getPhrase(),
     children: [],
     workspace,
     parent: parent,

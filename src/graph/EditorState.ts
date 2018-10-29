@@ -1,6 +1,6 @@
 import * as mobx from 'mobx'
 import {screenToGrid, IScreen} from './Screen'
-import { IWorkspace } from './Graph';
+import { IGraph } from './Graph';
 import { WheelEventHandler, MouseEventHandler, MouseEvent, WheelEvent } from 'react';
 import { IGraphNode } from './GraphNode';
 import { ITreeLayoutNode } from './TreeLayout';
@@ -19,7 +19,7 @@ export interface IEditorState extends mobx.IObservableObject {
   onScroll: WheelEventHandler<Element>
 }
 
-export function EditorState(screen: IScreen, workspace: IWorkspace): IEditorState {
+export function EditorState(screen: IScreen, workspace: IGraph): IEditorState {
   const self: IEditorState = mobx.observable({
     selected: null,
     dragging: null,
@@ -62,7 +62,8 @@ export function EditorState(screen: IScreen, workspace: IWorkspace): IEditorStat
       self.panning = false
     },
     onScroll: (event: WheelEvent) => {
-      screen.modifyZoom({x: event.clientX, y: event.clientY}, event.deltaY)
+      // screen.modifyZoom({x: event.clientX, y: event.clientY}, event.deltaY)
+      screen.pan(event.deltaX, event.deltaY)
       event.preventDefault()
     }
   }, {

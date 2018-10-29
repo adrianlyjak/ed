@@ -2,19 +2,20 @@
 import {GraphNode, IGraphNode} from './GraphNode'
 import * as mobx from 'mobx'
 
- export interface IWorkspace extends mobx.IObservableObject {
+ export interface IGraph extends mobx.IObservableObject {
    
   nodes: mobx.IObservableArray<IGraphNode>
   selected?: IGraphNode
   lastSelected?: IGraphNode
   createNode: (template: any) => IGraphNode
   select(node: IGraphNode | null): void
-  readonly links: any[]
+  readonly links: IGraphNode[][]
+  readonly nonRootNodes: IGraphNode[]
  }
 
- /* @return {Workspace} */
-export function Workspace(): IWorkspace {
-  const self: IWorkspace = mobx.observable.object({
+
+export function Graph(): IGraph {
+  const self: IGraph = mobx.observable.object({
     nodes: mobx.observable.array([]),
     selected: null,
     lastSelected: null,
@@ -31,17 +32,21 @@ export function Workspace(): IWorkspace {
     },
     get links() {
       const ls = []
-      for (let node of self.nodes) {
+      for (let node of self.nonRootNodes) {
         for (let c of node.children) {
           ls.push([node, c])
         }
       }
       return ls;
+    },
+    get nonRootNodes(): IGraphNode[] {
+      return self.nodes.filter(x => !!x.parent)
     }
   }, {
     createNode: mobx.action,
     select: mobx.action,
     links: mobx.computed,
+    nonRootNodes: mobx.computed
   })
   return self
 }

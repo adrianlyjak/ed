@@ -1,6 +1,10 @@
-import jss from 'jss'
+import jss, { StyleSheet } from 'jss'
+import { Theme } from '@material-ui/core';
+import { Style } from 'jss/css';
+import './material-sizes.css'
+export type StyleName = "materialUI"
 
-export default function createTheme(materialUI) {
+export default function createTheme(materialUI: Theme): StyleSheet<StyleName> {
 
   const {primary, secondary, grey} = materialUI.palette
   const simpleColorsArray = [
@@ -49,10 +53,10 @@ export default function createTheme(materialUI) {
     ]
   ]
   const simpleColors = simpleColorsArray.reduce(
-    (sum, [name, higlight, element]) => ({
+    (sum, [name, highlight, element]) => ({
       ...sum,
       [`@global .${name}`]: element || {}, 
-      [`@global .${name}.cm-formatting`]: higlight || {}
+      [`@global .${name}.cm-formatting`]: highlight || {}
     }),
     {}
   )
@@ -62,23 +66,24 @@ export default function createTheme(materialUI) {
   }
 
   return jss.createStyleSheet({
-
-    materialUI: {
+    materialUI: ({
       ...shared,
+
       '@global .cm-s-material-ui': {
+          padding: '0px',
           '@global .CodeMirror-selected': {
               background: materialUI.palette['primary']['100']
           },
           '@global .CodeMirror-line': {
 
           },
-          '@global .cm-hr::after': { 
-            content: "\"<hr />\"",
-          },
+          // '@global .cm-hr::after': { 
+          //   content: "\"<hr />\"",
+          // },
           ...simpleColors,
           '&': { ...shared },
         }
-      }
+      } as any as Style)
 
   }).attach()
 }
